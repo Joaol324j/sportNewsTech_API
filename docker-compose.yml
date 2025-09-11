@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    container_name: sport_app
+    restart: unless-stopped
+    ports:
+      - "3080:3080"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/appdb
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+  db: 
+    image: postgres:16
+    container_name: sport_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
