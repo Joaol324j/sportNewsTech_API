@@ -65,3 +65,13 @@ No `package.json`, você encontrará os seguintes scripts úteis:
 ├── README.md                 # Este arquivo
 └── tsconfig.json             # Configuração do TypeScript
 ```
+
+## Documentação da API (Swagger)
+
+A documentação interativa da API está disponível via Swagger UI. Após iniciar a aplicação, acesse:
+
+```
+http://localhost:3080/docs
+```
+
+Isso permitirá que você explore todos os endpoints disponíveis, seus parâmetros, modelos de requisição e respostas.
