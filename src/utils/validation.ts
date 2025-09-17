@@ -14,6 +14,15 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'A senha é obrigatória.'),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Por favor, insira um e-mail válido.'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'O token é obrigatório.'),
+  newPassword: z.string().min(6, 'A nova senha deve ter pelo menos 6 caracteres.'),
+});
+
 export const articleSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   subtitle: z.string().optional(),

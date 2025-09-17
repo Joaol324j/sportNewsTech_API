@@ -1,7 +1,7 @@
 
 import { Router } from 'express';
-import { register, login } from '../controllers/authController';
-import { validate, registerSchema, loginSchema } from '../utils/validation';
+import {register, login, forgotPassword, resetPasswordController} from '../controllers/authController';
+import {validate, registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema} from '../utils/validation';
 
 const router = Router();
 
@@ -131,6 +131,65 @@ router.post('/register', validate(registerSchema), register);
  *         description: Erro interno do servidor
  */
 router.post('/login', validate(loginSchema), login);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Solicita um token de redefinição de senha
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: usuario@example.com
+ *     responses:
+ *       200:
+ *         description: Token de redefinição de senha solicitado com sucesso
+ *       400:
+ *         description: Usuário não encontrado ou dados inválidos
+ */
+router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Redefine a senha do usuário com um token
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token de redefinição de senha recebido por e-mail
+ *                 example: "some_long_hex_token"
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: MinhaNovaSenhaSecreta123
+ *     responses:
+ *       200:
+ *         description: Senha redefinida com sucesso
+ *       400:
+ *         description: Token inválido ou expirado, ou dados inválidos
+ */
+router.post('/reset-password', validate(resetPasswordSchema), resetPasswordController);
 
 export default router;
 
