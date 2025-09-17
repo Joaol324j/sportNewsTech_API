@@ -2,6 +2,8 @@
 import { Request, Response } from 'express';
 import { registerUser, loginUser, requestPasswordReset, resetPassword } from '../services/authService';
 import { validationResult } from 'express-validator';
+import { AuthRequest } from '../types/auth';
+import * as authService from '../services/authService';
 
 export const register = async (req: Request, res: Response) => {
   const errors = validationResult(req);
@@ -62,6 +64,22 @@ export const resetPasswordController = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Senha redefinida com sucesso.' });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const getProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Não autorizado.' });
+    }
+    const user = await authService.getProfile(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    res.status(200).json({ id: user.id, username: user.username, email: user.email, role: user.role });
+  } catch (error) {
+    console.error('Erro ao obter perfil do usuário:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
   }
 };
 

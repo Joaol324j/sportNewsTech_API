@@ -2,6 +2,8 @@
 import { Router } from 'express';
 import {register, login, forgotPassword, resetPasswordController} from '../controllers/authController';
 import {validate, registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema} from '../utils/validation';
+import authMiddleware from '../middleware/authMiddleware';
+import { getProfile } from '../controllers/authController';
 
 const router = Router();
 
@@ -190,6 +192,46 @@ router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
  *         description: Token inválido ou expirado, ou dados inválidos
  */
 router.post('/reset-password', validate(resetPasswordSchema), resetPasswordController);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Obtém o perfil do usuário logado
+ *     tags: [Autenticação]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil do usuário obtido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                   enum: [USER, EDITOR, JOURNALIST]
+ *       401:
+ *         description: Não autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Não autorizado.
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/me', authMiddleware, getProfile);
 
 export default router;
 
