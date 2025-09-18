@@ -1,17 +1,11 @@
 import { Request, Response } from 'express';
-import { createArticle, getArticleById, updateArticle, deleteArticle, getAllArticles, incrementArticleViews } from '../services/articleService';
+import { createArticle, getArticleById, getArticleBySlug, updateArticle, deleteArticle, getAllArticles, incrementArticleViews } from '../services/articleService';
 import { Role, ArticleStatus } from '../generated/prisma';
-
-interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    role: Role;
-  };
-}
+import { AuthRequest } from '../types/auth';
 
 export const create = async (req: AuthRequest, res: Response) => {
   try {
-    const authorId = req.user?.userId;
+    const authorId = req.user?.id;
     if (!authorId) {
       return res.status(401).json({ message: 'Não autenticado.' });
     }
@@ -22,14 +16,24 @@ export const create = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getById = async (req: Request, res: Response) => {
+export const getBySlugOrId = async (req: Request, res: Response) => {
   try {
-    const article = await getArticleById(req.params.id);
+    const { identifier } = req.params;
+    let article = null;
+
+    if (identifier.length === 24) { 
+        article = await getArticleById(identifier);
+    }
+
+    if (!article) {
+        article = await getArticleBySlug(identifier);
+    }
+
     if (!article) {
       return res.status(404).json({ message: 'Artigo não encontrado.' });
     }
     if (article.status === ArticleStatus.PUBLISHED) {
-      await incrementArticleViews(req.params.id);
+      await incrementArticleViews(article.id);
     }
     res.status(200).json(article);
   } catch (error: any) {
@@ -39,7 +43,7 @@ export const getById = async (req: Request, res: Response) => {
 
 export const update = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const userRole = req.user?.role;
     const article = await getArticleById(req.params.id);
 
@@ -60,7 +64,7 @@ export const update = async (req: AuthRequest, res: Response) => {
 
 export const remove = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const userRole = req.user?.role;
     const article = await getArticleById(req.params.id);
 

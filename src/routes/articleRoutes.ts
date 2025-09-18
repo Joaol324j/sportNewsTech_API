@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create, getById, update, remove, list } from '../controllers/articleController';
+import { create, getBySlugOrId, update, remove, list } from '../controllers/articleController';
 import { authenticateToken, authorizeRoles } from '../middleware/rbacMiddleware';
 import { Role } from '../generated/prisma';
 import { validate, articleSchema } from '../utils/validation';
@@ -143,6 +143,97 @@ router.post('/', authenticateToken, authorizeRoles([Role.JOURNALIST, Role.EDITOR
 
 /**
  * @swagger
+ * /api/articles/slug/{slug}:
+ *   get:
+ *     summary: Obtém um artigo por slug
+ *     tags: [Artigos]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: meu-primeiro-artigo
+ *         description: Slug do artigo
+ *     responses:
+ *       200:
+ *         description: Detalhes do artigo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: clx0k8s4a0000abcde123456
+ *                 title:
+ *                   type: string
+ *                   example: Meu Primeiro Artigo
+ *                 slug:
+ *                   type: string
+ *                   example: meu-primeiro-artigo
+ *                 subtitle:
+ *                   type: string
+ *                   example: Um subtítulo interessante
+ *                 content:
+ *                   type: string
+ *                   example: Conteúdo completo do artigo.
+ *                 coverImage:
+ *                   type: string
+ *                   example: https://example.com/image.jpg
+ *                 status:
+ *                   type: string
+ *                   enum: [DRAFT, SCHEDULED, PUBLISHED]
+ *                   example: PUBLISHED
+ *                 publishedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-09-10T10:00:00Z'
+ *                 authorId:
+ *                   type: string
+ *                   example: clx0k8s4a0000abcde123456
+ *                 categoryId:
+ *                   type: string
+ *                   example: clx0k8s4a0000abcde123457
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: clx0k8s4a0000abcde123459
+ *                       name:
+ *                         type: string
+ *                         example: noticias
+ *                 viewsCount:
+ *                   type: integer
+ *                   example: 150
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-09-10T09:00:00Z'
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-09-10T11:00:00Z'
+ *       404:
+ *         description: Artigo não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Artigo não encontrado.
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/slug/:identifier', getBySlugOrId);
+
+/**
+ * @swagger
  * /api/articles:
  *   get:
  *     summary: Lista todos os artigos
@@ -227,13 +318,13 @@ router.post('/', authenticateToken, authorizeRoles([Role.JOURNALIST, Role.EDITOR
  *                     type: integer
  *                     example: 150
  *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                     example: '2025-09-10T09:00:00Z'
- *                   updatedAt:
- *                     type: string
- *                     format: date-time
- *                     example: '2025-09-10T11:00:00Z'
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-09-10T09:00:00Z'
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-09-10T11:00:00Z'
  *       500:
  *         description: Erro interno do servidor
  */
@@ -328,7 +419,7 @@ router.get('/', list);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/:id', getById);
+router.get('/:id', getBySlugOrId);
 
 /**
  * @swagger

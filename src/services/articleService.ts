@@ -50,6 +50,14 @@ export const getArticleById = async (id: string) => {
   return article;
 };
 
+export const getArticleBySlug = async (slug: string) => {
+  const article = await prisma.article.findUnique({
+    where: { slug },
+    include: { author: true, category: true, tags: true },
+  });
+  return article;
+};
+
 export const updateArticle = async (id: string, articleData: Partial<ArticleData>) => {
   const { title, subtitle, content, coverImage, categoryId, tags, status, publishedAt } = articleData;
 
